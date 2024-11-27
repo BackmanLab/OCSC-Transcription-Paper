@@ -8,17 +8,27 @@
 #SBATCH -t 24:00:00
 #SBATCH --job-name="STAR Alignment Test"
 
-# Load modules
+# Load the STAR module version 2.5.2
 module load STAR/2.5.2
 
-# Set working directory
+# Change to the working directory containing raw sequence files
 cd /projects/b1042/BackmanLab/Jane/Chemo_OCSC/seq_raw
 
-# Commands to execute
+# Define the path to the genome directory
 genomefold=/projects/b1042/BackmanLab/Jane/ref_hg38ensembl
+
+# Define the output directory based on the current directory name
 outfold="$(dirname "$(pwd)")/${PWD##*/}_output"
-[ ! -d $outfold ]&&mkdir $outfold
+
+# Create the output directory if it doesn't exist
+[ ! -d $outfold ] && mkdir $outfold
+
+# Loop through each FASTQ file in the directory
 for file in *.fastq.gz;
-do echo "$file";
-STAR --runThreadN 16 --quantMode TranscriptomeSAM --genomeDir $genomefold --readFilesIn <(gunzip -c "${file}") --outFileNamePrefix "$outfold/${file%.*.*}";
+do
+    # Print the file name
+    echo "$file"
+    
+    # Run STAR alignment for each file
+    STAR --runThreadN 16 --quantMode TranscriptomeSAM --genomeDir $genomefold --readFilesIn <(gunzip -c "${file}") --outFileNamePrefix "$outfold/${file%.*.*}"
 done
